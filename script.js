@@ -201,7 +201,10 @@ function initOrderPage() {
       method: "POST",
       body: JSON.stringify(payload),
     })
-      .then(() => {
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Apps Script ตอบกลับ status " + res.status);
+        }
         window.location.href = "thankyou.html";
       })
       .catch((error) => {
