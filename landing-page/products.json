@@ -8,11 +8,9 @@
     "colors": ["ดำ", "ขาว", "เทา"],
     "size": ["S", "M", "L", "XL"],
     "price": 390,
-    "image": "images/basic/1.jpg",
+    "image": "images/basic_f.jpg",
     "images": [
-      "images/basic_f/1.jpg",
-      "images/basic_f/2.jpg",
-      "images/basic_f/3.jpg"
+      "images/basic_f.jpg"
     ],
     "description": "เสื้อยืดทรงโอเวอร์ไซซ์ ตัดเย็บจากผ้าคอตตอน 100% เนื้อนุ่ม สวมใส่สบาย ดีไซน์เรียบง่าย เข้าได้กับทุกลุค เหมาะสำหรับสวมใส่ในชีวิตประจำวัน"
   },
@@ -25,11 +23,9 @@
     "colors": ["ดำ", "กรม", "ขาว"],
     "size": ["S", "M", "L", "XL"],
     "price": 490,
-    "image": "images/polo/1.jpg",
+    "image": "images/polo_f.jpg",
     "images": [
-      "images/polo_f/1.jpg",
-      "images/polo_f/2.jpg",
-      "images/polo_f/3.jpg"
+      "images/polo_f.jpg"
     ],
     "description": "เสื้อโปโลทรงคลาสสิก ตัดเย็บจากผ้าคอตตอนผสมโพลีเอสเตอร์ ระบายอากาศดี ทรง Regular Fit สวมใส่ได้ทั้งลำลองและกึ่งทางการ"
   },
@@ -42,11 +38,9 @@
     "colors": ["ดำ", "เทา", "น้ำตาล"],
     "size": ["M", "L", "XL"],
     "price": 690,
-    "image": "images/hoodie/1.jpg",
+    "image": "images/hoot_f.jpg",
     "images": [
-      "images/hoodie_f/1.jpg",
-      "images/hoodie_f/2.jpg",
-      "images/hoodie_f/3.jpg"
+      "images/hoot_f.jpg"
     ],
     "description": "ฮู้ดดี้เนื้อผ้าบางเบา ทรง Loose Fit ใส่สบาย ไม่ร้อนอบอ้าว เหมาะกับสภาพอากาศเมืองร้อน ดีไซน์เรียบหรู เข้าได้กับหลายสไตล์"
   }
