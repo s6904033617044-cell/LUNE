@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สินค้าทั้งหมด — MAISON NOIR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Jost:wght@300;400;500&family=Noto+Serif+Thai:wght@400;500&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <nav class="nav">
+      <a href="index.html" class="logo">MAISON NOIR</a>
+      <ul class="nav-links">
+        <li><a href="index.html">หน้าแรก</a></li>
+        <li><a href="product.html">สินค้าทั้งหมด</a></li>
+        <li><a href="index.html#mood">เลือกตามมู้ด</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <div class="container">
+        <div class="section-title">
+          <span class="eyebrow">Collection</span>
+          <h2>สินค้าทั้งหมด</h2>
+        </div>
+
+        <!-- ปุ่มกรอง: script.js จะสร้างเนื้อหาให้อัตโนมัติ -->
+        <div id="filter-bar" style="margin-bottom: var(--space-lg);"></div>
+
+        <!-- การ์ดสินค้า: script.js จะดึงข้อมูลจาก products.json มา render -->
+        <div id="product-list" class="product-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span class="logo">MAISON NOIR</span>
+    <p>&copy; 2026 Maison Noir. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
