@@ -3,8 +3,8 @@
    ========================================================= */
 
 /* ---------- ตั้งค่าที่ต้องแก้ไขก่อนใช้งานจริง ---------- */
-const APPS_SCRIPT_URL = "[https://script.google.com/macros/s/AKfycbyXEqlpBLOHE1c36O8syIiqX2wx4HDEs4GSF4lxatY_5LzoBSpcuGvXTDO_yL_oQm6M/exec]"; // <-- แก้เป็น URL ของ Google Apps Script Web App
-const CSV_URL = "[https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3Eu6X1jQjLVHjTZF-xKeG4FgBuYbQPjww1c84TGHDIqwWrn9siz6SFEbO02XATFalYfon3YuBiSq/pub?gid=0&single=true&output=csv]";                 // <-- แก้เป็น URL CSV ของ Google Sheet (Publish to web)
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXEqlpBLOHE1c36O8syIiqX2wx4HDEs4GSF4lxatY_5LzoBSpcuGvXTDO_yL_oQm6M/exec"; // <-- แก้เป็น URL ของ Google Apps Script Web App
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3Eu6X1jQjLVHjTZF-xKeG4FgBuYbQPjww1c84TGHDIqwWrn9siz6SFEbO02XATFalYfon3YuBiSq/pub?gid=0&single=true&output=csv";                 // <-- แก้เป็น URL CSV ของ Google Sheet (Publish to web)
 const PRODUCTS_JSON_URL = "products.json";
 
 /* ทำงานทันทีที่ DOM พร้อม แล้วเช็คว่าอยู่หน้าไหนจาก element ที่มีอยู่จริง */
