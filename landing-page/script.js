@@ -4,6 +4,7 @@
 
 /* ---------- ตั้งค่าที่ต้องแก้ไขก่อนใช้งานจริง ---------- */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXEqlpBLOHE1c36O8syIiqX2wx4HDEs4GSF4lxatY_5LzoBSpcuGvXTDO_yL_oQm6M/exec"; // <-- แก้เป็น URL ของ Google Apps Script Web App
+const TELEGRAM_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6weYdnfNYdljynopUJZH0MVYaazyNs2G1TMAJ3CFi0uRP6xSNAH4G79yVPtF89apm/exec";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3Eu6X1jQjLVHjTZF-xKeG4FgBuYbQPjww1c84TGHDIqwWrn9siz6SFEbO02XATFalYfon3YuBiSq/pub?gid=0&single=true&output=csv";                 // <-- แก้เป็น URL CSV ของ Google Sheet (Publish to web)
 const PRODUCTS_JSON_URL = "products.json";
 
@@ -27,26 +28,28 @@ function initProductPage() {
   const listEl = document.getElementById("product-list");
   const filterBar = document.getElementById("filter-bar");
 
-  fetch(PRODUCTS_JSON_URL)
-    .then((res) => {
-      if (!res.ok) throw new Error("โหลด products.json ไม่สำเร็จ");
-      return res.json();
-    })
-    .then((products) => {
-      const moodFromUrl = new URLSearchParams(window.location.search).get("mood");
+Promise.all([
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }),
 
-      if (filterBar) {
-        buildFilterBar(filterBar, products, listEl, moodFromUrl);
-      }
+  fetch(TELEGRAM_SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }),
+])
+  .then(([orderRes, telegramRes]) => {
+    if (!orderRes.ok) {
+      throw new Error("ส่งออเดอร์ไปยังระบบเดิมไม่สำเร็จ");
+    }
 
-      renderProductCards(listEl, filterProducts(products, moodFromUrl));
-    })
-    .catch((err) => {
-      console.error(err);
-      if (listEl) {
-        listEl.innerHTML = "<p>ไม่สามารถโหลดข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง</p>";
-      }
-    });
+    window.location.href = "thankyou.html";
+  })
+  .catch((error) => {
+    console.error(error);
+    alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+  });
 }
 
 /* กรองสินค้าตาม mood/type ถ้ามีค่า (จับคู่แบบไม่สนตัวพิมพ์เล็ก-ใหญ่, ค่า "all" = ไม่กรอง) */
