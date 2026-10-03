@@ -198,7 +198,9 @@ function initOrderPage() {
       note: getValue("note"),
     };
 
-    Promise.all([
+    // ใช้ allSettled แทน all — เพื่อให้ "ส่ง Telegram ไม่สำเร็จ" ไม่ทำให้ทั้งออเดอร์ error ไปด้วย
+    // ความสำเร็จของการขาย วัดจากการบันทึกลง Google Sheet (APPS_SCRIPT_URL) เท่านั้น
+    Promise.allSettled([
       fetch(APPS_SCRIPT_URL, {
         method: "POST",
         body: JSON.stringify(payload),
@@ -207,19 +209,28 @@ function initOrderPage() {
         method: "POST",
         body: JSON.stringify(payload),
       }),
-    ])
-      .then(([orderRes]) => {
-        // เช็คเฉพาะผลของการบันทึกออเดอร์หลัก (Apps Script -> Sheet)
-        // ถ้าแจ้งเตือน Telegram ล้มเหลว จะไม่บล็อกการขาย (ถือว่าออเดอร์สำเร็จแล้ว)
-        if (!orderRes.ok) {
-          throw new Error("ส่งออเดอร์ไปยัง Google Sheet ไม่สำเร็จ (status " + orderRes.status + ")");
-        }
-        window.location.href = "thankyou.html";
-      })
-      .catch((error) => {
-        console.error(error);
+    ]).then(([orderResult, telegramResult]) => {
+      // แจ้งเตือน Telegram ล้มเหลว แค่ log ไว้เฉยๆ ไม่กระทบ flow การขาย
+      if (telegramResult.status === "rejected") {
+        console.error("[Telegram] ส่งแจ้งเตือนไม่สำเร็จ:", telegramResult.reason);
+      } else if (!telegramResult.value.ok) {
+        console.error("[Telegram] ส่งแจ้งเตือนไม่สำเร็จ status:", telegramResult.value.status);
+      }
+
+      // เช็คเฉพาะผลของการบันทึกออเดอร์หลัก (Apps Script -> Sheet) เท่านั้นว่าขายสำเร็จจริงไหม
+      if (orderResult.status === "rejected") {
+        console.error(orderResult.reason);
         alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
-      });
+        return;
+      }
+      if (!orderResult.value.ok) {
+        console.error("ส่งออเดอร์ไปยัง Google Sheet ไม่สำเร็จ (status " + orderResult.value.status + ")");
+        alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+        return;
+      }
+
+      window.location.href = "thankyou.html";
+    });
   });
 }
 
