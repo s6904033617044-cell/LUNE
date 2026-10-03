@@ -28,28 +28,26 @@ function initProductPage() {
   const listEl = document.getElementById("product-list");
   const filterBar = document.getElementById("filter-bar");
 
-Promise.all([
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  }),
+  fetch(PRODUCTS_JSON_URL)
+    .then((res) => {
+      if (!res.ok) throw new Error("โหลด products.json ไม่สำเร็จ");
+      return res.json();
+    })
+    .then((products) => {
+      const moodFromUrl = new URLSearchParams(window.location.search).get("mood");
 
-  fetch(TELEGRAM_SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  }),
-])
-  .then(([orderRes, telegramRes]) => {
-    if (!orderRes.ok) {
-      throw new Error("ส่งออเดอร์ไปยังระบบเดิมไม่สำเร็จ");
-    }
+      if (filterBar) {
+        buildFilterBar(filterBar, products, listEl, moodFromUrl);
+      }
 
-    window.location.href = "thankyou.html";
-  })
-  .catch((error) => {
-    console.error(error);
-    alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
-  });
+      renderProductCards(listEl, filterProducts(products, moodFromUrl));
+    })
+    .catch((err) => {
+      console.error(err);
+      if (listEl) {
+        listEl.innerHTML = "<p>ไม่สามารถโหลดข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง</p>";
+      }
+    });
 }
 
 /* กรองสินค้าตาม mood/type ถ้ามีค่า (จับคู่แบบไม่สนตัวพิมพ์เล็ก-ใหญ่, ค่า "all" = ไม่กรอง) */
@@ -200,13 +198,21 @@ function initOrderPage() {
       note: getValue("note"),
     };
 
-    fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Apps Script ตอบกลับ status " + res.status);
+    Promise.all([
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+      fetch(TELEGRAM_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    ])
+      .then(([orderRes]) => {
+        // เช็คเฉพาะผลของการบันทึกออเดอร์หลัก (Apps Script -> Sheet)
+        // ถ้าแจ้งเตือน Telegram ล้มเหลว จะไม่บล็อกการขาย (ถือว่าออเดอร์สำเร็จแล้ว)
+        if (!orderRes.ok) {
+          throw new Error("ส่งออเดอร์ไปยัง Google Sheet ไม่สำเร็จ (status " + orderRes.status + ")");
         }
         window.location.href = "thankyou.html";
       })
