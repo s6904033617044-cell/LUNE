@@ -2,13 +2,12 @@
    script.js — ใช้ร่วมกันทุกหน้า (product.html / order.html / admin.html)
    ========================================================= */
 
-/* ---------- ตั้งค่าที่ต้องแก้ไขก่อนใช้งานจริง ---------- */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXEqlpBLOHE1c36O8syIiqX2wx4HDEs4GSF4lxatY_5LzoBSpcuGvXTDO_yL_oQm6M/exec"; // <-- แก้เป็น URL ของ Google Apps Script Web App
+/* ---------- ตั้งค่า ---------- */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXEqlpBLOHE1c36O8syIiqX2wx4HDEs4GSF4lxatY_5LzoBSpcuGvXTDO_yL_oQm6M/exec";
 const TELEGRAM_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMSuoeIrUGj69R2TJS3ut-AyYljSxeGewCl-o8cwXJ207-cwxlr9Cw9S4v5lTVwyPm7A/exec";
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3Eu6X1jQjLVHjTZF-xKeG4FgBuYbQPjww1c84TGHDIqwWrn9siz6SFEbO02XATFalYfon3YuBiSq/pub?gid=0&single=true&output=csv";                 // <-- แก้เป็น URL CSV ของ Google Sheet (Publish to web)
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3Eu6X1jQjLVHjTZF-xKeG4FgBuYbQPjww1c84TGHDIqwWrn9siz6SFEbO02XATFalYfon3YuBiSq/pub?gid=0&single=true&output=csv";
 const PRODUCTS_JSON_URL = "products.json";
 
-/* ทำงานทันทีที่ DOM พร้อม แล้วเช็คว่าอยู่หน้าไหนจาก element ที่มีอยู่จริง */
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("product-list")) {
     initProductPage();
@@ -22,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================================================
-   1) product.html — โหลดสินค้า + กรอง + ลิงก์ไปหน้าสั่งซื้อ
+   1) product.html
    ========================================================= */
 function initProductPage() {
   const listEl = document.getElementById("product-list");
@@ -50,7 +49,6 @@ function initProductPage() {
     });
 }
 
-/* กรองสินค้าตาม mood/type ถ้ามีค่า (จับคู่แบบไม่สนตัวพิมพ์เล็ก-ใหญ่, ค่า "all" = ไม่กรอง) */
 function filterProducts(products, mood) {
   if (!mood || mood.toLowerCase() === "all") return products;
   return products.filter(
@@ -58,7 +56,6 @@ function filterProducts(products, mood) {
   );
 }
 
-/* สร้างแถบปุ่มกรองจากประเภทสินค้าที่มีอยู่จริงใน products.json */
 function buildFilterBar(filterBar, products, listEl, activeMood) {
   const types = Array.from(new Set(products.map((p) => p.type))).filter(Boolean);
 
@@ -82,7 +79,6 @@ function buildFilterBar(filterBar, products, listEl, activeMood) {
         .forEach((b) => b.classList.remove("selected"));
       btn.classList.add("selected");
 
-      // อัปเดต URL แบบไม่รีโหลดหน้า
       const url = new URL(window.location.href);
       if (value === "all") {
         url.searchParams.delete("mood");
@@ -100,7 +96,6 @@ function buildFilterBar(filterBar, products, listEl, activeMood) {
   types.forEach((type) => filterBar.appendChild(makeButton(type, type)));
 }
 
-/* วาดการ์ดสินค้าลงใน #product-list */
 function renderProductCards(listEl, products) {
   if (!listEl) return;
 
@@ -165,7 +160,7 @@ function escapeHtml(str) {
 }
 
 /* =========================================================
-   2) order.html — เติมฟอร์มจาก URL parameter + ส่งข้อมูลไป Apps Script
+   2) order.html
    ========================================================= */
 function initOrderPage() {
   const params = new URLSearchParams(window.location.search);
@@ -176,12 +171,10 @@ function initOrderPage() {
   const itemsField = document.getElementById("items");
   const totalField = document.getElementById("total");
 
-  // เติมชื่อสินค้า (พร้อมไซส์ถ้ามี) ลงช่อง items
   if (itemsField) {
     itemsField.value = size ? `${item} (${size})` : item;
   }
 
-  // สำคัญมาก: ต้องเติมราคาลงช่อง total เสมอ ห้ามเว้นว่าง
   if (totalField) {
     totalField.value = price;
   }
@@ -198,37 +191,29 @@ function initOrderPage() {
       note: getValue("note"),
     };
 
-    // ใช้ allSettled แทน all — เพื่อให้ "ส่ง Telegram ไม่สำเร็จ" ไม่ทำให้ทั้งออเดอร์ error ไปด้วย
-    // ความสำเร็จของการขาย วัดจากการบันทึกลง Google Sheet (APPS_SCRIPT_URL) เท่านั้น
     Promise.allSettled([
       fetch(APPS_SCRIPT_URL, {
         method: "POST",
+        mode: "no-cors",
         body: JSON.stringify(payload),
       }),
       fetch(TELEGRAM_SCRIPT_URL, {
         method: "POST",
+        mode: "no-cors",
         body: JSON.stringify(payload),
       }),
     ]).then(([orderResult, telegramResult]) => {
-      // แจ้งเตือน Telegram ล้มเหลว แค่ log ไว้เฉยๆ ไม่กระทบ flow การขาย
-      if (telegramResult.status === "rejected") {
-        console.error("[Telegram] ส่งแจ้งเตือนไม่สำเร็จ:", telegramResult.reason);
-      } else if (!telegramResult.value.ok) {
-        console.error("[Telegram] ส่งแจ้งเตือนไม่สำเร็จ status:", telegramResult.value.status);
-      }
-
-      // เช็คเฉพาะผลของการบันทึกออเดอร์หลัก (Apps Script -> Sheet) เท่านั้นว่าขายสำเร็จจริงไหม
       if (orderResult.status === "rejected") {
-        console.error(orderResult.reason);
-        alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
-        return;
+        console.error("[Sheet] ส่งไม่สำเร็จ:", orderResult.reason);
       }
-      if (!orderResult.value.ok) {
-        console.error("ส่งออเดอร์ไปยัง Google Sheet ไม่สำเร็จ (status " + orderResult.value.status + ")");
-        alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
-        return;
+      if (telegramResult.status === "rejected") {
+        console.error("[Telegram] ส่งไม่สำเร็จ:", telegramResult.reason);
       }
 
+      if (orderResult.status === "rejected" && telegramResult.status === "rejected") {
+        alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+        return;
+      }
       window.location.href = "thankyou.html";
     });
   });
@@ -240,7 +225,7 @@ function getValue(id) {
 }
 
 /* =========================================================
-   3) admin.html — โหลด CSV มาแสดงเป็นตาราง (ล่าสุดขึ้นก่อน)
+   3) admin.html
    ========================================================= */
 function initAdminPage() {
   const tbody = document.querySelector("#ordersTable tbody");
@@ -260,19 +245,12 @@ function initAdminPage() {
     });
 }
 
-/*
- * Parser CSV แบบง่าย เขียนเอง ไม่พึ่ง library ภายนอก
- * รองรับ: ฟิลด์ที่ครอบด้วย " ", comma ภายใน quote, quote คู่ (""),
- * และขึ้นบรรทัดใหม่ภายใน quoted field
- * คืนค่าเป็น array of objects โดยใช้แถวแรกเป็น header
- */
 function parseCSV(text) {
   const rows = [];
   let row = [];
   let field = "";
   let inQuotes = false;
 
-  // ตัด BOM ถ้ามี แล้ว normalize \r\n เป็น \n
   const cleaned = text.replace(/^\uFEFF/, "");
 
   for (let i = 0; i < cleaned.length; i++) {
@@ -295,7 +273,7 @@ function parseCSV(text) {
         row.push(field);
         field = "";
       } else if (char === "\r") {
-        // ข้าม \r เดี่ยว ๆ รอ \n
+        // ข้าม \r
       } else if (char === "\n") {
         row.push(field);
         rows.push(row);
@@ -307,7 +285,6 @@ function parseCSV(text) {
     }
   }
 
-  // เพิ่มฟิลด์/แถวสุดท้ายถ้ายังไม่ได้ push (กรณีไฟล์ไม่ลงท้ายด้วย newline)
   if (field.length > 0 || row.length > 0) {
     row.push(field);
     rows.push(row);
@@ -327,7 +304,6 @@ function parseCSV(text) {
   });
 }
 
-/* พยายามหาคอลัมน์จากชื่อ header หลายแบบ (ไทย/อังกฤษ) ถ้าไม่เจอ fallback เป็นตำแหน่งคอลัมน์ */
 function pickField(row, keys, fallbackIndex) {
   const rowKeys = Object.keys(row);
   for (const key of keys) {
@@ -356,7 +332,6 @@ function renderOrdersTable(tbody, rows) {
     note: pickField(row, ["note", "หมายเหตุ"], 5),
   }));
 
-  // เรียงจากล่าสุดขึ้นก่อน โดยพยายาม parse เป็นวันที่ ถ้า parse ไม่ได้ ให้ใช้ลำดับย้อนกลับ
   mapped.sort((a, b) => {
     const dateA = new Date(a.timestamp);
     const dateB = new Date(b.timestamp);
