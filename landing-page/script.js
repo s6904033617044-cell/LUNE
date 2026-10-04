@@ -3,7 +3,7 @@
    ========================================================= */
 
 /* ---------- ตั้งค่า ---------- */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXEqlpBLOHE1c36O8syIiqX2wx4HDEs4GSF4lxatY_5LzoBSpcuGvXTDO_yL_oQm6M/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLWDnQHQItv9UMmBYwj_vhzNSWaCoZlCgHA4GdF400FbaT9iKKc4T8u-jm-qlTGBedZA/exec";
 const TELEGRAM_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMSuoeIrUGj69R2TJS3ut-AyYljSxeGewCl-o8cwXJ207-cwxlr9Cw9S4v5lTVwyPm7A/exec";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3Eu6X1jQjLVHjTZF-xKeG4FgBuYbQPjww1c84TGHDIqwWrn9siz6SFEbO02XATFalYfon3YuBiSq/pub?gid=0&single=true&output=csv";
 const PRODUCTS_JSON_URL = "products.json";
